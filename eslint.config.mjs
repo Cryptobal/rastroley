@@ -20,6 +20,11 @@ const eslintConfig = [
       "next-env.d.ts",
       "public/w/**",
       "widget/**",
+      "app.js",
+      "api/**",
+      "lib/**",
+      "server.py",
+      "tests/**",
     ],
   },
 ];

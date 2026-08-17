@@ -1,0 +1,59 @@
+{
+  "framework": null,
+  "functions": {
+    "api/scan.py": {
+      "maxDuration": 30,
+      "includeFiles": "lib/{scan.py,rastro_engine.py}"
+    },
+    "api/informe.py": {
+      "maxDuration": 15,
+      "includeFiles": "lib/informe.py"
+    },
+    "api/pay/create.py": {
+      "maxDuration": 15,
+      "includeFiles": "lib/flow_pay.py"
+    },
+    "api/pay/confirm.py": {
+      "maxDuration": 15,
+      "includeFiles": "lib/flow_pay.py"
+    },
+    "api/pay/return.py": {
+      "maxDuration": 15,
+      "includeFiles": "lib/flow_pay.py"
+    },
+    "api/pay/status.py": {
+      "maxDuration": 15,
+      "includeFiles": "lib/flow_pay.py"
+    }
+  },
+  "routes": [
+    { "src": "/(.*)\\.py$", "status": 404 },
+    { "src": "/\\.env(.*)", "status": 404 },
+    { "src": "/lib(?:/.*)?", "status": 404 },
+    { "src": "/scan", "dest": "/api/scan" },
+    { "src": "/pay/(create|confirm|return|status)", "dest": "/api/pay/$1" },
+    { "src": "/informe", "dest": "/api/informe" },
+    {
+      "src": "/widget/rastro.js",
+      "methods": ["OPTIONS"],
+      "status": 204,
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Access-Control-Allow-Headers": "*",
+        "Cache-Control": "public, max-age=300",
+        "X-Content-Type-Options": "nosniff"
+      }
+    },
+    {
+      "src": "/widget/rastro.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Cache-Control": "public, max-age=300",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "continue": true
+    }
+  ]
+}

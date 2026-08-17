@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rastro — aviso de cookies y escáner de píxeles (Ley 21.719)</title>
+  <meta name="description" content="Scan gratis de píxeles. Se cobra el cartel. Herramienta/IA, no es asesoría legal, no es la Agencia.">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2314211c' width='32' height='32'/%3E%3Ccircle cx='10' cy='22' r='3' fill='%23e3f06a'/%3E%3Ccircle cx='18' cy='14' r='2.2' fill='%23e3f06a'/%3E%3Ccircle cx='24' cy='8' r='1.6' fill='%23e3f06a'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip" href="#scan">Ir al scan</a>
+  <p class="legal-strip">Herramienta/IA. No es asesoría legal. No es la Agencia de Protección de Datos Personales.</p>
+
+  <header class="site">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"></span>
+      <span>Rastro</span>
+    </div>
+    <nav>
+      <a href="#scan">Scan</a>
+      <a href="#planes">Planes</a>
+      <a href="#cartel">Cartel</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="kicker">Chile · Ley 21.719</p>
+      <h1>Scan gratis. Se cobra el cartel.</h1>
+      <p class="lede">Rastro mira el HTML público de un sitio y hasta 10 <code>script src</code> — sin ejecutar JavaScript — y te dice qué píxeles ve. El aviso de cookies es una sola línea. Lo opera una IA. No somos la Agencia.</p>
+    </section>
+
+    <section id="scan" class="panel">
+      <h2>Escanear un sitio</h2>
+      <form id="scan-form">
+        <label for="url">URL pública</label>
+        <div class="row">
+          <input id="url" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://tusitio.cl" required>
+          <button type="submit" id="scan-btn">Escanear gratis</button>
+        </div>
+      </form>
+      <p id="scan-status" class="status" hidden></p>
+      <div id="results" hidden>
+        <div class="score-wrap">
+          <p class="score" id="score">—</p>
+          <p id="score-meta"></p>
+        </div>
+        <ul id="tracker-list"></ul>
+        <div class="actions">
+          <button type="button" class="ghost" id="dl-informe">Descargar informe HTML</button>
+          <a class="ghost" href="/api/informe?ejemplo=1" target="_blank" rel="noopener">Ver informe de ejemplo</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="gracias" class="panel thanks" hidden>
+      <h2>Pago recibido</h2>
+      <p id="thanks-copy">Flow confirmó el pago (estado 2). Aquí va el informe y el snippet del cartel. Pro es un pago del mes, no una suscripción que se renueva sola.</p>
+      <pre id="thanks-snippet"></pre>
+      <div class="actions">
+        <button type="button" class="ghost" id="copy-thanks">Copiar snippet</button>
+        <button type="button" class="ghost" id="dl-thanks">Descargar informe</button>
+      </div>
+    </section>
+
+    <section id="planes" class="panel">
+      <h2>Planes</h2>
+      <p class="fine">El scan no se cobra. Se cobra el informe y el cartel. Precios en CLP. Flow pide un email.</p>
+      <form id="pay-form" class="pay-grid">
+        <label class="full">Email para Flow
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="tu@correo.cl" required>
+        </label>
+        <article class="plan">
+          <h3>Informe</h3>
+          <p class="price">$4.990</p>
+          <p>Un pago. Informe HTML del último scan.</p>
+          <button type="submit" name="plan" value="informe">Pagar informe</button>
+        </article>
+        <article class="plan">
+          <h3>Pro</h3>
+          <p class="price">$14.990</p>
+          <p><strong>Pago del mes</strong> — no es suscripción automática ni cobro recurrente. Pagas este mes; si quieres otro mes, vuelves a pagar.</p>
+          <button type="submit" name="plan" value="pro">Pagar el mes</button>
+        </article>
+      </form>
+      <p id="pay-status" class="status" hidden></p>
+    </section>
+
+    <section id="cartel" class="panel">
+      <h2>Una línea, sin defer ni async</h2>
+      <p>Pégala lo más arriba posible en el <code>&lt;head&gt;</code>. Si lleva <code>defer</code> o <code>async</code>, los píxeles pueden dispararse antes del aviso.</p>
+      <pre id="snippet"></pre>
+      <button type="button" id="copy-snippet">Copiar snippet (origen actual)</button>
+      <p class="fine">El widget usa Shadow DOM (Aceptar / Rechazar), guarda <code>localStorage.rastro_consent</code> y retiene <code>src</code> de trackers conocidos hasta que acepten. Demo local: <a href="/widget/demo.html">/widget/demo.html</a>.</p>
+    </section>
+  </main>
+
+  <footer class="site">
+    <p>Rastro no es la Agencia. No reemplaza a un abogado. El puntaje es heurístico: HTML + scripts bajados, User-Agent RastroBot, sin ejecutar JS.</p>
+  </footer>
+  <script src="/app.js"></script>
+</body>
+</html>

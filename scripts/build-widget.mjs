@@ -9,7 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const VERSION = "0.4.0";
+const VERSION = "0.4.1";
 const root = path.join(__dirname, "..");
 const entry = path.join(root, "widget", "rastro.js");
 const outDir = path.join(root, "public", "w");

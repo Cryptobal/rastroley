@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+data/
+out/
+__pycache__
+*.pyc
+.vercel
+.python-version
+uv.lock
+prospectos.md
+outreach-draft.md
+server.py
+pyproject.toml
+requirements.txt
