@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+data/
+orders.json
+out/
+.vercel
+__pycache__/
+*.pyc
+.DS_Store
