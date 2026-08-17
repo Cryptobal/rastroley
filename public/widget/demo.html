@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo Rastro widget</title>
+  <script src="/widget/rastro.js"></script>
+  <script src="https://www.googletagmanager.com/gtm.js?id=GTM-DEMO"></script>
+  <script src="https://connect.facebook.net/en_US/fbevents.js"></script>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, sans-serif; background: #101612; color: #eef3e6; margin: 0; padding: 1.2rem; }
+    code { background: #1a221c; padding: .1rem .3rem; }
+    button { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Demo local del cartel</h1>
+  <p>Esta página carga el widget <strong>sin defer/async</strong> y declara dos <code>script src</code> de trackers. Si el banner está activo, esos src no deberían dispararse hasta Aceptar.</p>
+  <p>Consentimiento actual: <code id="state"></code></p>
+  <p>Herramienta/IA. No es asesoría legal. No es la Agencia.</p>
+  <button type="button" id="reset">Borrar rastro_consent</button>
+  <script>
+    function show() {
+      document.getElementById("state").textContent = localStorage.getItem("rastro_consent") || "(vacío)";
+    }
+    show();
+    document.getElementById("reset").onclick = function () {
+      localStorage.removeItem("rastro_consent");
+      location.reload();
+    };
+  </script>
+</body>
+</html>

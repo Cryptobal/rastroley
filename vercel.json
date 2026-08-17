@@ -1,5 +1,8 @@
 {
   "framework": null,
+  "installCommand": "echo skip-install",
+  "buildCommand": "mkdir -p public/widget && cp -f index.html app.js styles.css public/ && cp -f widget/rastro.js widget/demo.html public/widget/",
+  "outputDirectory": "public",
   "functions": {
     "api/scan.py": {
       "maxDuration": 30,
@@ -54,6 +57,17 @@
         "X-Content-Type-Options": "nosniff"
       },
       "continue": true
-    }
+    },
+    {
+      "src": "/w/(.*)\\.js$",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Cache-Control": "public, max-age=300",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "continue": true
+    },
+    { "src": "^/$", "dest": "/index.html" }
   ]
 }

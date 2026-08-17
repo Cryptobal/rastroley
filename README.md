@@ -31,7 +31,7 @@ Scripts: `npm run lint` · `npm run typecheck` · `npm test` · `npm run build`
 
 ## Vercel Python (v0.4)
 
-Sitio estático + funciones Python (`api/*.py`). `vercel.json` fija `"framework": null`.
+Sitio estático + funciones Python (`api/*.py`). `vercel.json` fija `"framework": null` y `"outputDirectory": "public"` (Vercel Other publica `public/`, no el `index.html` de la raíz). La landing vive en `public/index.html` (+ `app.js`, `styles.css`, `widget/rastro.js`).
 
 ### Planes (CLP)
 
