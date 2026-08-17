@@ -135,12 +135,32 @@ class ConfigTests(unittest.TestCase):
     def test_vercel_framework_null(self) -> None:
         cfg = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
         self.assertIsNone(cfg["framework"])
+        self.assertEqual(cfg["outputDirectory"], "public")
         self.assertEqual(cfg["functions"]["api/scan.py"]["maxDuration"], 30)
         self.assertIn("lib/{scan.py,rastro_engine.py}", cfg["functions"]["api/scan.py"]["includeFiles"])
 
+    def test_public_landing_for_vercel_other(self) -> None:
+        landing = (ROOT / "public" / "index.html").read_text(encoding="utf-8")
+        self.assertIn("Rastro", landing)
+        self.assertIn('id="scan-form"', landing)
+        self.assertIn('id="pay-form"', landing)
+        self.assertIn("/widget/rastro.js", (ROOT / "public" / "app.js").read_text(encoding="utf-8"))
+        widget = ROOT / "public" / "widget" / "rastro.js"
+        self.assertTrue(widget.is_file())
+        js = widget.read_text(encoding="utf-8")
+        self.assertIn("rastro_consent", js)
+        self.assertIn("Aceptar", js)
+
     def test_no_old_preview_url(self) -> None:
         forbidden = "rastro-gard-security.vercel.app"
-        for path in [ROOT / "README.md", ROOT / "outreach-draft.md", ROOT / "index.html", ROOT / "app.js"]:
+        for path in [
+            ROOT / "README.md",
+            ROOT / "outreach-draft.md",
+            ROOT / "index.html",
+            ROOT / "app.js",
+            ROOT / "public" / "index.html",
+            ROOT / "public" / "app.js",
+        ]:
             self.assertNotIn(forbidden, path.read_text(encoding="utf-8"))
         self.assertIn("{URL_PUBLICA}", (ROOT / "outreach-draft.md").read_text(encoding="utf-8"))
 
