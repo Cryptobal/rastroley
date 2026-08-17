@@ -1,99 +1,79 @@
 # Rastro
 
-Aviso de cookies + escáner de píxeles para la Ley 21.719 (Chile). **Scan gratis. Se cobra el cartel.**
+Aviso de cookies + escáner de píxeles para la Ley 21.719 (Chile).  
+**Scan gratis. Se cobra el cartel** (con evidencia de consentimiento en el stack Pro).
 
-Herramienta/IA. **No es asesoría legal.** **No es la Agencia** de Protección de Datos Personales.
+Herramienta/IA. **No es asesoría legal.** **No garantiza cumplimiento.** **No es la Agencia** de Protección de Datos Personales. No cita montos de multa.
 
-Esto es un sitio estático en Vercel con funciones Python (`api/*.py`). **No** es una app Python de un solo entrypoint: `vercel.json` fija `"framework": null` para que el CLI no pida un archivo Python principal.
+## Estado del repo (transición)
 
-## Planes (CLP)
+Hay **dos capas** conviviendo mientras migramos:
+
+| Capa | Qué es | Cómo correr |
+| --- | --- | --- |
+| **Next.js 15** (objetivo) | App Router + Prisma + APIs TS + landing | `npm install && npm run dev` |
+| **Vercel Python** (v0.4 actual) | `index.html` + `api/*.py` + Flow | `python3 server.py` → :8766 |
+
+La arquitectura objetivo aprobada es Next.js + Prisma + widget vanilla CDN. El stack Python se mantiene operativo hasta completar Fases 1–2.
+
+## Next.js (Fase 0+)
+
+```bash
+cp .env.example .env   # DATABASE_URL + opcionales Flow
+npm install
+npx prisma migrate dev
+npm run db:seed
+npm run widget:build
+npm run dev
+```
+
+Scripts: `npm run lint` · `npm run typecheck` · `npm test` · `npm run build`
+
+## Vercel Python (v0.4)
+
+Sitio estático + funciones Python (`api/*.py`). `vercel.json` fija `"framework": null`.
+
+### Planes (CLP)
 
 | Plan | Precio | Qué es |
 | --- | --- | --- |
-| Scan | $0 | POST `/api/scan` (también `/scan`). HTML público + hasta 10 `script src`. User-Agent `RastroBot`. Sin ejecutar JS. JSON. |
+| Scan | $0 | POST `/api/scan` (también `/scan`). HTML + hasta 10 `script src`. Sin ejecutar JS. |
 | Informe | $4.990 | Un pago. Informe HTML del scan. |
-| Pro | $14.990 | **Pago del mes.** No es suscripción automática ni cobro recurrente. |
+| Pro | $14.990 | **Pago del mes.** No es suscripción automática (aún). |
 
-Pagos con [Flow](https://www.flow.cl). El webhook `/pay/confirm` recibe `token`, llama `payment/getStatus` y **solo considera pagado si `status` es 2**. El retorno redirige a `/?pago=1&token=`.
+Pagos con [Flow](https://www.flow.cl). El webhook `/pay/confirm` solo marca pagado si `status` es 2.
 
-## Correr en local
-
-Solo stdlib de Python 3.10+ (sin `requirements.txt` en el deploy).
+### Local Python
 
 ```bash
-cp .env.example .env   # opcional; las claves Flow pueden ir vacías
+cp .env.example .env
 python3 server.py
 ```
 
-Abre [http://127.0.0.1:8766](http://127.0.0.1:8766).
+Abre http://127.0.0.1:8766 — widget demo en `/widget/demo.html`.
 
-- Scan: formulario en la landing, o `POST /api/scan` y `POST /scan` con `{"url":"https://…"}`.
-- Informe de ejemplo: [http://127.0.0.1:8766/api/informe?ejemplo=1](http://127.0.0.1:8766/api/informe?ejemplo=1)
-- Widget demo: [http://127.0.0.1:8766/widget/demo.html](http://127.0.0.1:8766/widget/demo.html)
-- `server.py` está en `.vercelignore`: sirve para local, no se sube a Vercel.
-
-## Variables de entorno (Vercel y `.env` local)
-
-Copia `.env.example`. **Nunca** subas `.env`, claves Flow ni `orders.json`.
-
-```
-FLOW_API_KEY=
-FLOW_SECRET_KEY=
-FLOW_API_URL=https://www.flow.cl/api
-RASTRO_PUBLIC_URL=
-```
+### Variables Flow
 
 | Variable | Uso |
 | --- | --- |
-| `FLOW_API_KEY` | API Key del comercio Flow |
-| `FLOW_SECRET_KEY` | Secret para firmar: ordenar params, concatenar `nombre+valor`, HMAC-SHA256 hex en `s` |
-| `FLOW_API_URL` | Por defecto `https://www.flow.cl/api` (sandbox: `https://sandbox.flow.cl/api`) |
-| `RASTRO_PUBLIC_URL` | Origen público (`https://tudominio.cl`) para `urlConfirmation` y `urlReturn` de Flow |
-
-En Vercel: Project → Settings → Environment Variables. Sin `RASTRO_PUBLIC_URL`, se intenta `VERCEL_URL` o el header `Host`.
-
-## Deploy en Vercel
-
-1. Importa este repo. Framework: **Other** / ninguno (`framework: null`).
-2. Configura las cuatro variables de arriba.
-3. Output: estático en la raíz (`index.html`, `app.js`, `styles.css`, `widget/`) + serverless en `api/`.
-
-Rutas (`vercel.json`):
-
-- `POST /scan` → `/api/scan`
-- `/pay/create|confirm|return|status` → `/api/pay/…`
-- `/informe` → `/api/informe`
-- `*.py`, `.env*`, `/lib` → 404
-- `/widget/rastro.js` → CORS `*`, GET/HEAD/OPTIONS, cache 300, `nosniff`
+| `FLOW_API_KEY` | API Key del comercio |
+| `FLOW_SECRET_KEY` | Secret HMAC |
+| `FLOW_API_URL` | `https://www.flow.cl/api` (sandbox: `https://sandbox.flow.cl/api`) |
+| `RASTRO_PUBLIC_URL` | Origen público para callbacks |
 
 ## Widget
 
-Una línea, **sin** `defer` ni `async`, lo más arriba posible en `<head>`:
-
 ```html
-<script src="{origen}/widget/rastro.js"></script>
+<script src="{origen}/widget/rastro.js" data-api="{origen}" data-site-key="{SITE_KEY}"></script>
 ```
 
-La landing copia el snippet con el **origen actual** (`location.origin`). Shadow DOM con Aceptar/Rechazar. Trackers conocidos se retienen hasta aceptar. Consentimiento: `localStorage.rastro_consent`.
+Sin `defer`/`async`, lo más arriba posible en `<head>`. Retiene trackers conocidos hasta aceptar; Consent Mode v2 + Meta; evidencia opcional vía `data-api`/`data-site-key`; botón para reabrir.
 
-## Scan (qué hace y qué no)
+Build CDN (Next): `npm run widget:build` → `public/w/rastro@VERSION.js`.
 
-- GET del HTML público.
-- Descarga hasta 10 `script src`.
-- Detecta GTM, GA/gtag, Meta, TikTok, Hotjar, Clarity, LinkedIn, X, HubSpot, Intercom, Crisp, Zendesk, DoubleClick, YouTube, Cloudflare Insights.
-- Puntaje desde 100. No ejecuta JavaScript. No es una auditoría legal ni un sello de la Agencia.
+## Dominio
 
-## Árbol relevante
-
-```
-api/scan.py api/informe.py api/pay/*.py   ← wrappers Vercel
-lib/scan.py lib/rastro_engine.py
-lib/flow_pay.py lib/informe.py
-index.html app.js styles.css
-widget/rastro.js widget/demo.html
-vercel.json .env.example
-server.py                                 ← solo local
-```
+`rastro.cl` ocupado. Candidatos: `rastrochile.cl`, `rastropro.cl`.
 
 ## Aviso
 

@@ -1,0 +1,127 @@
+// Rastro — schema base (Fase 0)
+// Minimización: ConsentLog guarda IP truncada/hasheada, no PII de titulares del cliente.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PlanCode {
+  INFORME
+  PRO
+  CUMPLIMIENTO
+  AGENCIA
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum ConsentDecision {
+  ACCEPT_ALL
+  REJECT_ALL
+  CUSTOM
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  sites         Site[]
+  subscriptions Subscription[]
+}
+
+model Site {
+  id              String       @id @default(cuid())
+  userId          String?
+  user            User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  domain          String
+  siteKey         String       @unique @default(cuid())
+  bannerVersion   String       @default("1.0.0")
+  categoriesEnabled Boolean    @default(false)
+  installVerifiedAt DateTime?
+  lastPingAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  consentLogs     ConsentLog[]
+  scans           Scan[]
+
+  @@index([userId])
+  @@index([domain])
+}
+
+model Plan {
+  id            String         @id @default(cuid())
+  code          PlanCode       @unique
+  name          String
+  priceClp      Int
+  interval      String // one_shot | month
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id              String             @id @default(cuid())
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId          String
+  plan            Plan               @relation(fields: [planId], references: [id])
+  status          SubscriptionStatus @default(PENDING)
+  flowOrderId     String?            @unique
+  flowCustomerId  String?
+  currentPeriodEnd DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model ConsentLog {
+  id              String           @id @default(cuid())
+  siteId          String
+  site            Site             @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteKey         String
+  decidedAt       DateTime         @default(now())
+  decision        ConsentDecision
+  bannerVersion   String
+  categoriesJson  String? // {"analytics":true,"marketing":false}
+  ipHashTrunc     String // hash de IP truncada (minimización)
+  userAgent       String
+  createdAt       DateTime         @default(now())
+
+  @@index([siteId, decidedAt])
+  @@index([siteKey, decidedAt])
+}
+
+model Scan {
+  id           String   @id @default(cuid())
+  siteId       String?
+  site         Site?    @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  url          String
+  kind         String   @default("free") // free | pro
+  findingsJson String
+  createdAt    DateTime @default(now())
+
+  @@index([url])
+  @@index([createdAt])
+}
+
+model RetentionPolicy {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  days        Int
+  description String
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
